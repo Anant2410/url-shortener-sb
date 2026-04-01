@@ -54,11 +54,16 @@ public class UrlMappingController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<ClickEventResponseDto>> getUrlAnalytics(@PathVariable String shortUrl,
                                                                        @RequestParam("startDate") String startDate,
-                                                                       @RequestParam("endDate") String endDate)
+                                                                       @RequestParam(value = "endDate", required = false) String endDate)
     {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         LocalDateTime start = LocalDateTime.parse(startDate, formatter);
-        LocalDateTime end = LocalDateTime.parse(endDate, formatter);
+        LocalDateTime end;
+        if (endDate == null || endDate.isEmpty()) {
+            end = LocalDateTime.now(); // 🔥 current time
+        } else {
+            end = LocalDateTime.parse(endDate, formatter);
+        }
 
         List<ClickEventResponseDto> list = urlMappingService.getClickEventByDate(shortUrl, start, end);
         return ResponseEntity.ok(list);
