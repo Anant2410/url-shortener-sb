@@ -72,15 +72,15 @@ public class UrlMappingController {
     @GetMapping("/totalClicks")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Map<LocalDate, Long>> getTotalClicksByDate(Principal principal,
-                                                                     @RequestParam("startDate") String startDate,
-                                                                     @RequestParam("endDate") String endDate)
+                                                                     @RequestParam("startDate") @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                                                     @RequestParam(value = "endDate", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) LocalDate endDate)
     {
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
         User user = userService.findByUsername(principal.getName());
-        LocalDate start = LocalDate.parse(startDate, formatter);
-        LocalDate end = LocalDate.parse(endDate, formatter);
+        LocalDate end = (endDate == null) ? LocalDate.now() : endDate;
 
-        Map<LocalDate, Long> totalClicks = urlMappingService.getTotalClicksByUserAndDate(user, start, end);
+        Map<LocalDate, Long> totalClicks =
+                urlMappingService.getTotalClicksByUserAndDate(user, startDate, end);
+
         return ResponseEntity.ok(totalClicks);
     }
 }
